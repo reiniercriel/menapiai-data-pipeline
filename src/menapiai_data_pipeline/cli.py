@@ -32,7 +32,27 @@ def ingest(source: str) -> None:
         from menapiai_data_pipeline.ingestion.jobs_electrician_basic import ingest_jobs_data
         ingest_jobs_data()
 
-    logger.info(f"Completed ingestion for source: {source}")
+    
+@main.command()
+@click.option("--local-path", type=str, default=None, help="Path to local Redfin CSV (optional)")
+def ingest_housing_redfin(local_path: str) -> None:
+    """
+    Ingest Redfin housing data (metro-level).
+    """
+    logger.info("Starting Redfin housing ingestion...")
+    from menapiai_data_pipeline.ingestion.housing_redfin import ingest_housing_redfin
+    ingest_housing_redfin(local_path)
+    logger.info("Completed Redfin housing ingestion.")
+
+@main.command()
+def transform_housing_redfin() -> None:
+    """
+    Transform Redfin housing data to canonical housing_trends table.
+    """
+    logger.info("Starting Redfin housing transformation...")
+    from menapiai_data_pipeline.transforms.housing_redfin_to_canonical import transform_housing_redfin_to_canonical
+    transform_housing_redfin_to_canonical()
+    logger.info("Completed Redfin housing transformation.")
 
 
 @main.command()
