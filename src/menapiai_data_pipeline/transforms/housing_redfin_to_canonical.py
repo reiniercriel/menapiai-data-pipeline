@@ -1,3 +1,20 @@
+from menapiai_data_pipeline.shared.canonical_columns_housing import (
+    CANONICAL_HOUSING_REGION_ID,
+    CANONICAL_HOUSING_PERIOD_BEGIN,
+    CANONICAL_HOUSING_MEDIAN_SALE_PRICE,
+    CANONICAL_HOUSING_HOMES_SOLD,
+    CANONICAL_HOUSING_INVENTORY,
+    CANONICAL_HOUSING_MEDIAN_DAYS_ON_MARKET,
+)
+from menapiai_data_pipeline.shared.raw_columns_housing_redfin import (
+    RAW_HOUSING_REDFIN_CITY,
+    RAW_HOUSING_REDFIN_STATE,
+    RAW_HOUSING_REDFIN_PERIOD_BEGIN,
+    RAW_HOUSING_REDFIN_MEDIAN_SALE_PRICE,
+    RAW_HOUSING_REDFIN_HOMES_SOLD,
+    RAW_HOUSING_REDFIN_INVENTORY,
+    RAW_HOUSING_REDFIN_MEDIAN_DOM,
+)
 """Transform Redfin housing CSV to canonical housing_trends table."""
 
 import pandas as pd
@@ -23,12 +40,12 @@ def transform_housing_redfin_to_canonical() -> pd.DataFrame:
 
     # Map to canonical schema
     df_canonical = pd.DataFrame({
-        "region_id": df["CITY"] + "_" + df["STATE"],
-        "period_begin": pd.to_datetime(df["PERIOD_BEGIN"]),
-        "median_sale_price": df["MEDIAN_SALE_PRICE"],
-        "homes_sold": df["HOMES_SOLD"],
-        "inventory": df["INVENTORY"],
-        "median_days_on_market": df["MEDIAN_DOM"],
+        CANONICAL_HOUSING_REGION_ID: df[RAW_HOUSING_REDFIN_CITY] + "_" + df[RAW_HOUSING_REDFIN_STATE],
+        CANONICAL_HOUSING_PERIOD_BEGIN: pd.to_datetime(df[RAW_HOUSING_REDFIN_PERIOD_BEGIN]),
+        CANONICAL_HOUSING_MEDIAN_SALE_PRICE: df[RAW_HOUSING_REDFIN_MEDIAN_SALE_PRICE],
+        CANONICAL_HOUSING_HOMES_SOLD: df[RAW_HOUSING_REDFIN_HOMES_SOLD],
+        CANONICAL_HOUSING_INVENTORY: df[RAW_HOUSING_REDFIN_INVENTORY],
+        CANONICAL_HOUSING_MEDIAN_DAYS_ON_MARKET: df[RAW_HOUSING_REDFIN_MEDIAN_DOM],
     })
 
     # Save to Parquet

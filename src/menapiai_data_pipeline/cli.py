@@ -13,36 +13,18 @@ def main(log_level: str) -> None:
     """MENAPI AI Data Pipeline CLI."""
     setup_logging(log_level)
 
-
 @main.command()
-@click.option("--source", type=click.Choice(["housing", "jobs"]), required=True)
-def ingest(source: str) -> None:
+@click.option("--city", type=str, required=True, help="City name")
+@click.option("--state", type=str, required=True, help="State name")
+@click.option("--local-path", type=str, default=None, help="Path to local Redfin TSV (optional)")
+def ingest_housing_city_redfin(city: str, state: str, local_path: str) -> None:
     """
-    Ingest data from a source.
-
-    Args:
-        source: Data source to ingest (housing or jobs)
+    Ingest Redfin city-level housing data for a specific city/state.
     """
-    logger.info(f"Starting ingestion for source: {source}")
-
-    if source == "housing":
-        from menapiai_data_pipeline.ingestion.housing_basic import ingest_housing_data
-        ingest_housing_data()
-    elif source == "jobs":
-        from menapiai_data_pipeline.ingestion.jobs_electrician_basic import ingest_jobs_data
-        ingest_jobs_data()
-
-    
-@main.command()
-@click.option("--local-path", type=str, default=None, help="Path to local Redfin CSV (optional)")
-def ingest_housing_redfin(local_path: str) -> None:
-    """
-    Ingest Redfin housing data (metro-level).
-    """
-    logger.info("Starting Redfin housing ingestion...")
-    from menapiai_data_pipeline.ingestion.housing_redfin import ingest_housing_redfin
-    ingest_housing_redfin(local_path)
-    logger.info("Completed Redfin housing ingestion.")
+    logger.info(f"Starting Redfin city housing ingestion for {city}, {state}...")
+    from menapiai_data_pipeline.ingestion.housing_city_redfin import ingest_housing_city_redfin
+    ingest_housing_city_redfin(city=city, state=state, local_path=local_path)
+    logger.info("Completed Redfin city housing ingestion.")
 
 @main.command()
 def transform_housing_redfin() -> None:
@@ -53,28 +35,6 @@ def transform_housing_redfin() -> None:
     from menapiai_data_pipeline.transforms.housing_redfin_to_canonical import transform_housing_redfin_to_canonical
     transform_housing_redfin_to_canonical()
     logger.info("Completed Redfin housing transformation.")
-
-
-@main.command()
-@click.option("--dataset", type=click.Choice(["housing", "jobs"]), required=True)
-def transform(dataset: str) -> None:
-    """
-    Transform a dataset.
-
-    Args:
-        dataset: Dataset to transform (housing or jobs)
-    """
-    logger.info(f"Starting transformation for dataset: {dataset}")
-
-    if dataset == "housing":
-        from menapiai_data_pipeline.transforms.housing import transform_housing_data
-        transform_housing_data()
-    elif dataset == "jobs":
-        from menapiai_data_pipeline.transforms.jobs import transform_jobs_data
-        transform_jobs_data()
-
-    logger.info(f"Completed transformation for dataset: {dataset}")
-
 
 if __name__ == "__main__":
     main()

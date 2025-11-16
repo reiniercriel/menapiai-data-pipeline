@@ -1,5 +1,7 @@
 # Menapi.ai Data Pipeline
 
+My playground for some data-ingestion, AI, ML and Web stuff. Please see menapiai-docs repo for an overview
+
 Menapi.ai is an AI-powered platform that discovers emerging **business, job, and investment opportunities** by combining housing, labor market, and financial data.
 
 This repository hosts the **data ingestion and normalization layer** for Menapi.ai.
