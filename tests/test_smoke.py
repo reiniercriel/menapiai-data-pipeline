@@ -27,7 +27,7 @@ def test_full_pipeline_portland_oregon():
         transform_housing_redfin_to_canonical,
     )
 
-    # Run ingestion for Portland, OR and write raw TSV
+    # Run ingestion for Portland, OR and write raw TSV (full span)
     df_ingested = ingest_housing_city_redfin(city="Portland", state="Oregon")
 
     assert not df_ingested.empty
@@ -37,8 +37,19 @@ def test_full_pipeline_portland_oregon():
     raw_tsv_path = Path(settings.raw_data_dir) / "housing_redfin.tsv"
     assert raw_tsv_path.exists()
 
-    # Run transform to canonical Parquet
+    # Run transform to canonical Parquet for the full span
     df_canonical = transform_housing_redfin_to_canonical()
 
     assert not df_canonical.empty
     assert (df_canonical["region_id"] == "Portland_Oregon").any()
+
+    # Now run ingestion with a bounded time span as an extra smoke check
+    df_ingested_bounded = ingest_housing_city_redfin(
+        city="Portland",
+        state="Oregon",
+        start_date="2020-01-01",
+        end_date="2020-12-31",
+    )
+
+    # It may legitimately be empty for that range, but it must not error
+    assert df_ingested_bounded is not None

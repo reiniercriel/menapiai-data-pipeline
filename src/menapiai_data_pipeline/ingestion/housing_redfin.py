@@ -46,7 +46,14 @@ def download_redfin_city_tsv(url: str, output_path: Path) -> None:
 
 
 
-def ingest_housing_city_redfin(city: str = "Portland", state: str = "Oregon", local_path: str = None) -> pd.DataFrame:
+def ingest_housing_city_redfin(
+    city: str = "Portland",
+    state: str = "Oregon",
+    local_path: str | None = None,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    property_type: str | None = None,
+) -> str:
     """
     Ingest Redfin city-level housing data, filter by city/state, normalize schema.
     Downloads the TSV file only if not present or older than 24 hours.
@@ -73,17 +80,27 @@ def ingest_housing_city_redfin(city: str = "Portland", state: str = "Oregon", lo
 
     # Filter to selected city/state
     df_city = df[(df[RAW_HOUSING_REDFIN_CITY] == city) & (df[RAW_HOUSING_REDFIN_STATE] == state)]
-    logger.info(f"Filtered to {len(df_city)} records for city={city}, state={state}")
+    if property_type and RAW_HOUSING_REDFIN_PROPERTY_TYPE in df_city.columns:
+        df_city = df_city[df_city[RAW_HOUSING_REDFIN_PROPERTY_TYPE] == property_type]
 
-    # Normalize to canonical schema
-    df_canonical = pd.DataFrame({
-        CANONICAL_HOUSING_REGION_ID: df_city[RAW_HOUSING_REDFIN_CITY] + "_" + df_city[RAW_HOUSING_REDFIN_STATE],
-        CANONICAL_HOUSING_PERIOD_BEGIN: pd.to_datetime(df_city[RAW_HOUSING_REDFIN_PERIOD_BEGIN]),
-        CANONICAL_HOUSING_MEDIAN_SALE_PRICE: df_city[RAW_HOUSING_REDFIN_MEDIAN_SALE_PRICE],
-        CANONICAL_HOUSING_HOMES_SOLD: df_city[RAW_HOUSING_REDFIN_HOMES_SOLD],
-        CANONICAL_HOUSING_INVENTORY: df_city[RAW_HOUSING_REDFIN_INVENTORY],
-        CANONICAL_HOUSING_MEDIAN_DAYS_ON_MARKET: df_city[RAW_HOUSING_REDFIN_MEDIAN_DOM],
-    })
-    # logger.info(f"Saved filtered Redfin TSV to {raw_tsv_path}")  # raw_tsv_path is not defined here
+    # Optional filter by time span (PERIOD_BEGIN)
+    if start_date or end_date:
+        period = pd.to_datetime(df_city[RAW_HOUSING_REDFIN_PERIOD_BEGIN])
+        if start_date:
+            start = pd.to_datetime(start_date)
+            df_city = df_city[period >= start]
+        if end_date:
+            end = pd.to_datetime(end_date)
+            df_city = df_city[period <= end]
 
-    return df_canonical
+    logger.info(
+        f"Filtered to {len(df_city)} records for city={city}, state={state}, "
+        f"start_date={start_date}, end_date={end_date}"
+    )
+
+    # Save filtered TSV for downstream use
+    safe_type = property_type.replace("/", "-").replace(" ", "_").lower() if property_type else "all"
+    filtered_tsv_path = tsv_path.parent / f"housing_redfin_{city}_{state}_{safe_type}_{start_date or 'start'}_{end_date or 'end'}.tsv"
+    df_city.to_csv(filtered_tsv_path, sep='\t', index=False)
+    logger.info(f"Saved filtered Redfin TSV to {filtered_tsv_path}")
+    return str(filtered_tsv_path)
