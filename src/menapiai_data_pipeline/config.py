@@ -20,6 +20,14 @@ class Settings(BaseSettings):
     data_dir: str = "data"
     raw_data_dir: str = "data/raw"
     processed_data_dir: str = "data/processed"
+    output_dir: str = "data/clean"  # Hardcoded output for Parquet files
+
+    # BLS API settings
+    bls_api_key: str | None = None
+
+    # Future: Cloud database settings (reserved for later upgrades)
+    # db_connection_string: str | None = None
+    # cloud_storage_bucket: str | None = None
 
     # Feature store settings
     feature_store_url: str = "http://localhost:8001"

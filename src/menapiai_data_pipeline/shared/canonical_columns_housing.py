@@ -10,3 +10,9 @@ CANONICAL_HOUSING_HOMES_SOLD = "homes_sold"
 CANONICAL_HOUSING_INVENTORY = "inventory"
 CANONICAL_HOUSING_MEDIAN_DAYS_ON_MARKET = "median_days_on_market"
 CANONICAL_HOUSING_PROPERTY_TYPE = "property_type"
+
+# Derived temporal field for monthly alignment
+CANONICAL_HOUSING_PERIOD_MONTH = "period_month"  # First day-of-month
+
+# Metadata
+CANONICAL_HOUSING_LAST_UPDATED = "last_updated"
